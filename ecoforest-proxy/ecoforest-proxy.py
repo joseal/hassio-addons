@@ -1,20 +1,17 @@
-"""
-Ecoforest proxy to transform replies to JSON
-"""
-
-import sys, logging, datetime, urllib, urllib2, json, requests, urlparse
+import sys, logging, datetime, urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, json, requests, urllib.parse
 from os import curdir, sep
-from BaseHTTPServer import BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler
 from requests.auth import HTTPBasicAuth
 
 # configuration
 jdata = json.load(open('/data/options.json'))
 
 DEBUG = bool(jdata['debug'])
-DEFAULT_PORT = int(jdata['default_port'])
-username = str(jdata['username'])
-passwd = str(jdata['passwd'])
-host = str(jdata['host'])
+DEFAULT_PORT = int(jdata['proxy_port'])
+
+host = str(jdata['ecoforest_host'])
+username = str(jdata['ecoforest_user'])
+passwd = str(jdata['ecoforest_pass'])
 
 ECOFOREST_URL = host + '/recepcion_datos_4.cgi'
 
@@ -33,7 +30,7 @@ class EcoforestServer(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps(response))
+            self.wfile.write(json.dumps(response).encode())
         except:
             self.send_error(500, 'Something went wrong here on the server side.')
 
@@ -128,7 +125,7 @@ class EcoforestServer(BaseHTTPRequestHandler):
 
 
     def do_POST(self):
-        parsed_path = urlparse.urlparse(self.path)
+        parsed_path = urllib.parse.urlparse(self.path)
         args = dict()
         if parsed_path.query:
             args = dict(qc.split("=") for qc in parsed_path.query.split("&"))
@@ -154,7 +151,7 @@ class EcoforestServer(BaseHTTPRequestHandler):
 
 
     def do_GET(self):
-        parsed_path = urlparse.urlparse(self.path)
+        parsed_path = urllib.parse.urlparse(self.path)
         args = dict()
         if parsed_path.query:
             args = dict(qc.split("=") for qc in parsed_path.query.split("&"))
@@ -181,10 +178,10 @@ class EcoforestServer(BaseHTTPRequestHandler):
 
 if __name__ == '__main__':
     try:
-        from BaseHTTPServer import HTTPServer
+        from http.server import HTTPServer
         server = HTTPServer(('', DEFAULT_PORT), EcoforestServer)
-        logging.info('Ecoforest proxy server started, use {Ctrl+C} to shut-down ...')
+        logging.info('Ecoforest proxy server has started.')
         server.serve_forever()
-    except Exception, e:
+    except Exception as e:
         logging.error(e)
         sys.exit(2)

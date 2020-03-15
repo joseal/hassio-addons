@@ -1,24 +1,24 @@
 {
 	"name": "ecoforest-proxy",
-	"version": "8",
-	"slug": "ecoforest-proxy",
+	"version": "0.2",
+	"slug": "ecoforest_proxy",
 	"description": "Ecoforest Proxy",
 	"arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
 	"startup": "before",
 	"boot": "auto",
 	"options": {
 		"debug": "0",
-		"default_port": "8998",
-		"username": "<USER>",
-		"passwd": "<PASS>",
-		"host": "http://192.168.1.70"
+		"proxy_port": "8998",
+		"ecoforest_host": "http://192.168.1.70",
+		"ecoforest_user": "",
+		"ecoforest_pass": ""
 	},
 	"schema": {
 		"debug": "bool",
-		"default_port": "int",
-		"username": "str",
-		"passwd": "str",
-		"host": "str"
+		"proxy_port": "int",
+		"ecoforest_host": "str",
+		"ecoforest_user": "str",
+		"ecoforest_pass": "str"
 	},
 	"ports": {
 		"8998/tcp": 8998
