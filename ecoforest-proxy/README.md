@@ -92,6 +92,51 @@ sensor:
         friendly_name: "Room Temperature"
         unit_of_measurement: "°C"
         value_template: "{{ state_attr('sensor.ecoforest', 'temperatura') }}"
+      ecoforest_aqs_temp:
+        entity_id: sensor.operationtemps
+        friendly_name: "Aqs Temperature"
+        unit_of_measurement: "°C"
+        value_template: "{{ state_attr('sensor.operationtemps', 'Ac') }}"
+      ecoforest_impulsao_temp:
+        entity_id: sensor.operationtemps
+        friendly_name: "Impulsao Temperature"
+        unit_of_measurement: "°C"
+        value_template: "{{ state_attr('sensor.operationtemps', 'Aa') }}"
+      ecoforest_retorno_temp:
+        entity_id: sensor.operationtemps
+        friendly_name: "Return Temperature"
+        unit_of_measurement: "°C"
+        value_template: "{{ state_attr('sensor.operationtemps', 'Ab') }}"
+      ecoforest_heating_temp:
+        entity_id: sensor.operationtemps
+        friendly_name: "Heating Temperature"
+        unit_of_measurement: "°C"
+        value_template: "{{ state_attr('sensor.operationtemps', 'Af') }}"
+      ecoforest_aqs_requested_temp:
+        entity_id: sensor.configtemps
+        friendly_name: "Aqs Requested Temperature"
+        unit_of_measurement: "°C"
+        value_template: "{{ state_attr('sensor.configtemps', 'Ba') }}"
+      ecoforest_ambiente_requested_temp:
+        entity_id: sensor.configtemps
+        friendly_name: "Ambiente Requested Temperature"
+        unit_of_measurement: "°C"
+        value_template: "{{ state_attr('sensor.configtemps', 'Be') }}"
+      ecoforest_delte_aqs_temp:
+        entity_id: sensor.configtemps
+        friendly_name: "Delta AQS Temperature"
+        unit_of_measurement: "°C"
+        value_template: "{{ state_attr('sensor.configtemps', 'Bc') }}"
+      ecoforest_requested_aqs_pump_temp:
+        entity_id: sensor.configtemps
+        friendly_name: "Requested AQS Pump Temperature"
+        unit_of_measurement: "°C"
+        value_template: "{{ state_attr('sensor.configtemps', 'Bj') }}"
+      ecoforest_heating_requested_pump_temp:
+        entity_id: sensor.configtemps
+        friendly_name: "Heating Requested Pump Temperature"
+        unit_of_measurement: "°C"
+        value_template: "{{ state_attr('sensor.configtemps', 'Bk') }}"
 ```
 ## Credits:
 
