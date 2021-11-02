@@ -132,8 +132,8 @@ class EcoforestServer(BaseHTTPRequestHandler):
 
     def ecoforest_config_temps(self):
         if AQUECIMENTO:
-            temps = self.ecoforest_call('idOperacion=1130')
-            return temps
+            config_temps = self.ecoforest_call('idOperacion=1130')
+            return config_temps
         return
 
 
