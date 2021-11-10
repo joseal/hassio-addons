@@ -9,6 +9,7 @@ jdata = json.load(open('/data/options.json'))
 
 DEBUG = bool(jdata['debug'])
 DEFAULT_PORT = int(jdata['proxy_port'])
+AQUECIMENTO = bool(jdata['aquecimento'])
 
 host = str(jdata['ecoforest_host'])
 username = str(jdata['ecoforest_user'])
@@ -47,6 +48,21 @@ class EcoforestServer(BaseHTTPRequestHandler):
         else:
             self.send_error(500, 'Something went wrong here on the server side.')
 
+    def temps(self):
+        if DEBUG: logging.debug('GET temps')
+        temps = self.ecoforest_temps()
+        if temps:
+            self.send(temps)
+        else:
+            self.send_error(500, 'Something went wrong here on the server side.')
+
+    def config_temps(self):
+        if DEBUG: logging.debug('GET config temps')
+        config_temps = self.ecoforest_config_temps()
+        if config_temps:
+            self.send(config_temps)
+        else:
+            self.send_error(500, 'Something went wrong here on the server side.')
 
     def set_status(self, status):
         if DEBUG: logging.debug('SET STATUS: %s' % (status))
@@ -107,6 +123,18 @@ class EcoforestServer(BaseHTTPRequestHandler):
         data = self.ecoforest_call('idOperacion=1004&potencia=' + str(power_final))
         print(data)
         self.send(self.ecoforest_stats())
+
+    def ecoforest_temps(self):
+        if AQUECIMENTO:
+            temps = self.ecoforest_call('idOperacion=1129')
+            return temps
+        return
+
+    def ecoforest_config_temps(self):
+        if AQUECIMENTO:
+            config_temps = self.ecoforest_call('idOperacion=1130')
+            return config_temps
+        return
 
 
     def ecoforest_stats(self):
@@ -190,6 +218,8 @@ class EcoforestServer(BaseHTTPRequestHandler):
         dispatch = {
             '/healthcheck': self.healthcheck,
             '/ecoforest/fullstats': self.stats,
+            '/ecoforest/operationtemps': self.temps,
+            '/ecoforest/configtemps': self.config_temps,
             '/ecoforest/status': self.get_status,
             '/ecoforest/set_status': self.set_status,
             '/ecoforest/set_temp': self.set_temp,
