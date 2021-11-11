@@ -48,6 +48,14 @@ class EcoforestServer(BaseHTTPRequestHandler):
         else:
             self.send_error(500, 'Something went wrong here on the server side.')
 
+    def current_operation_mode(self):
+        if DEBUG: logging.debug('GET current operation mode')
+        current_operation_mode = self.ecoforest_get_operation_mode()
+        if current_operation_mode:
+            self.send(current_operation_mode)
+        else:
+            self.send_error(500, 'Something went wrong here on the server side.')
+
     def temps(self):
         if DEBUG: logging.debug('GET temps')
         temps = self.ecoforest_temps()
@@ -61,6 +69,14 @@ class EcoforestServer(BaseHTTPRequestHandler):
         config_temps = self.ecoforest_config_temps()
         if config_temps:
             self.send(config_temps)
+        else:
+            self.send_error(500, 'Something went wrong here on the server side.')
+
+    def set_operation_mode(self, option):
+        if DEBUG: logging.debug('SET OPERATION MODE: %s' % (option))
+        operation_mode = self.ecoforest_set_operation_mode(option)
+        if operation_mode:
+            self.send(operation_mode)
         else:
             self.send_error(500, 'Something went wrong here on the server side.')
 
@@ -78,6 +94,9 @@ class EcoforestServer(BaseHTTPRequestHandler):
 
         self.send(self.get_status())
 
+    def get_current_operation_mode(self):
+        operation_mode = self.ecoforest_get_operation_mode()
+        self.send(operation_mode['CONTROL_CLIMA_INVIERNO'])
 
     def get_status(self):
         stats = self.ecoforest_stats()
@@ -136,6 +155,32 @@ class EcoforestServer(BaseHTTPRequestHandler):
             return config_temps
         return
 
+    def ecoforest_get_operation_mode(self):
+        current_operation_mode = self.ecoforest_call('idOperacion=1153')
+        reply = dict(e.split('=') for e in current_operation_mode.text.split('\n')[:-1]) # discard last line ?
+        states = {
+            '0'  : 'aqs + heating',
+            '1'  : 'aqs',
+            '2'  : 'heating'
+        }
+        state = reply['CONTROL_CLIMA_INVIERNO']
+        if state in states: 
+            reply['state'] = states[state]
+        else:
+            reply['state'] = 'unknown'
+            logging.debug('reply: %s', reply)
+
+        return reply
+
+
+    def ecoforest_set_operation_mode(self, option):
+        # 0 - AQS + Heating
+        # 1 - AQS
+        # 2 - Heating 
+        if AQUECIMENTO:
+            operation_mode = self.ecoforest_call('idOperacion=1152&CONTROL_CLIMA_INVIERNO=' + str(option))
+            return operation_mode
+        return
 
     def ecoforest_stats(self):
         stats = self.ecoforest_call('idOperacion=1002')
@@ -220,6 +265,7 @@ class EcoforestServer(BaseHTTPRequestHandler):
             '/ecoforest/fullstats': self.stats,
             '/ecoforest/operationtemps': self.temps,
             '/ecoforest/configtemps': self.config_temps,
+            '/ecoforest/current_operation_mode': self.current_operation_mode,
             '/ecoforest/status': self.get_status,
             '/ecoforest/set_status': self.set_status,
             '/ecoforest/set_temp': self.set_temp,
