@@ -1,10 +1,10 @@
 {
 	"name": "ecoforest-proxy",
-	"version": "0.3",
+	"version": "0.4",
 	"slug": "ecoforest_proxy",
 	"description": "Ecoforest Proxy",
 	"arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
-	"startup": "before",
+	"startup": "services",
 	"boot": "auto",
 	"options": {
 		"debug": "0",
