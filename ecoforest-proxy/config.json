@@ -8,7 +8,7 @@
 	"boot": "auto",
 	"options": {
 		"debug": "0",
-		"aquecimento": "0",
+		"domestic_hot_water": "0",
 		"proxy_port": "8998",
 		"ecoforest_host": "http://192.168.1.70",
 		"ecoforest_user": "",
@@ -16,7 +16,7 @@
 	},
 	"schema": {
 		"debug": "bool",
-		"aquecimento": "bool",
+		"domestic_hot_water": "bool",
 		"proxy_port": "int",
 		"ecoforest_host": "str",
 		"ecoforest_user": "str",
