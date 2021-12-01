@@ -26,6 +26,7 @@ This is an open project, so please feel free to create a PR for fixes and enhanc
 ### Add-on configuration:
 
         debug: '0'
+        domestic_hot_water: '0'
         proxy_port: '8998'
         ecoforest_host: 'http://192.168.1.70'
         ecoforest_user: '12345678901'
@@ -34,6 +35,10 @@ This is an open project, so please feel free to create a PR for fixes and enhanc
 #### Option: debug (required)
 
 If set to `1`, additoinal logging information will be add to log 
+
+#### Option: domestic_hot_water (required)
+
+If set to `1`, meaning is used a domestic hot water accumulator connected to stove
 
 #### Option: proxy_port (required)
 
@@ -55,11 +60,34 @@ Password used to access the stove web interface
 ### Home Assistant configuration:
 
 ```yaml
+#### Option: domestic_hot_water (required)
+
+If set to `1`, meaning is used a domestic hot water accumulator connected to stove
+
+#### Option: proxy_port (required)
+
+TCP port where the proxy service will be listening
+
+#### Option: ecoforest_host (required)
+
+Base URL of your stove
+
+#### Option: ecoforest_user (required)
+
+Username used to access the stove web interface
+
+#### Option: ecoforest_pass (required)
+
+Password used to access the stove web interface
+
+### Home Assistant configuration:
+
+```yaml
 sensor:
   - platform: rest
     name: ecoforest
-    resource: 'http://192.168.0.254:8998/ecoforest/fullstats'
-    method: 'GET'
+    resource: "http://192.168.0.254:8998/ecoforest/fullstats"
+    method: "GET"
     scan_interval: 10
     force_update: true
     json_attributes:
@@ -92,51 +120,95 @@ sensor:
         friendly_name: "Room Temperature"
         unit_of_measurement: "°C"
         value_template: "{{ state_attr('sensor.ecoforest', 'temperatura') }}"
+
+  - platform: rest
+    name: ecoforest_operation_temps
+    resource: "http://192.168.0.254:8998/ecoforest/operationtemps"
+    method: "GET"
+    scan_interval: 10
+    force_update: true
+    json_attributes:
+      - Ac
+      - Aa
+      - Ab
+      - Af
+  - platform: template
+    sensors:
       ecoforest_aqs_temp:
-        entity_id: sensor.operationtemps
-        friendly_name: "Aqs Temperature"
+        entity_id: sensor.ecoforest_operation_temps
+        friendly_name: "DHW Temperature"
         unit_of_measurement: "°C"
-        value_template: "{{ state_attr('sensor.operationtemps', 'Ac') }}"
+        value_template: "{{ state_attr('sensor.ecoforest_operation_temps', 'Ac') }}"
       ecoforest_impulsao_temp:
-        entity_id: sensor.operationtemps
+        entity_id: sensor.ecoforest_operation_temps
         friendly_name: "Impulsao Temperature"
         unit_of_measurement: "°C"
-        value_template: "{{ state_attr('sensor.operationtemps', 'Aa') }}"
+        value_template: "{{ state_attr('sensor.ecoforest_operation_temps', 'Aa') }}"
       ecoforest_retorno_temp:
-        entity_id: sensor.operationtemps
+        entity_id: sensor.ecoforest_operation_temps
         friendly_name: "Return Temperature"
         unit_of_measurement: "°C"
-        value_template: "{{ state_attr('sensor.operationtemps', 'Ab') }}"
+        value_template: "{{ state_attr('sensor.ecoforest_operation_temps', 'Ab') }}"
       ecoforest_heating_temp:
-        entity_id: sensor.operationtemps
+        entity_id: sensor.ecoforest_operation_temps
         friendly_name: "Heating Temperature"
         unit_of_measurement: "°C"
-        value_template: "{{ state_attr('sensor.operationtemps', 'Af') }}"
+        value_template: "{{ state_attr('sensor.ecoforest_operation_temps', 'Af') }}"
+
+  - platform: rest
+    name: ecoforest_configuration_temps
+    resource: "http://192.168.0.254:8998/ecoforest/configtemps"
+    method: "GET"
+    scan_interval: 10
+    force_update: true
+    json_attributes:
+      - Ba
+      - Be
+      - Bc
+      - Bj
+      - Bk
+  - platform: template
+    sensors:
       ecoforest_aqs_requested_temp:
-        entity_id: sensor.configtemps
-        friendly_name: "Aqs Requested Temperature"
+        entity_id: sensor.ecoforest_configuration_temps
+        friendly_name: "DHW Requested Temperature"
         unit_of_measurement: "°C"
-        value_template: "{{ state_attr('sensor.configtemps', 'Ba') }}"
+        value_template: "{{ state_attr('sensor.ecoforest_configuration_temps', 'Ba') }}"
       ecoforest_ambiente_requested_temp:
-        entity_id: sensor.configtemps
+        entity_id: sensor.ecoforest_configuration_temps
         friendly_name: "Ambiente Requested Temperature"
         unit_of_measurement: "°C"
-        value_template: "{{ state_attr('sensor.configtemps', 'Be') }}"
+        value_template: "{{ state_attr('sensor.ecoforest_configuration_temps', 'Be') }}"
       ecoforest_delte_aqs_temp:
-        entity_id: sensor.configtemps
-        friendly_name: "Delta AQS Temperature"
+        entity_id: sensor.ecoforest_configuration_temps
+        friendly_name: "Delta DHW Temperature"
         unit_of_measurement: "°C"
-        value_template: "{{ state_attr('sensor.configtemps', 'Bc') }}"
+        value_template: "{{ state_attr('sensor.ecoforest_configuration_temps', 'Bc') }}"
       ecoforest_requested_aqs_pump_temp:
-        entity_id: sensor.configtemps
-        friendly_name: "Requested AQS Pump Temperature"
+        entity_id: sensor.ecoforest_configuration_temps
+        friendly_name: "Requested DHW Pump Temperature"
         unit_of_measurement: "°C"
-        value_template: "{{ state_attr('sensor.configtemps', 'Bj') }}"
+        value_template: "{{ state_attr('sensor.ecoforest_configuration_temps', 'Bj') }}"
       ecoforest_heating_requested_pump_temp:
-        entity_id: sensor.configtemps
+        entity_id: sensor.ecoforest_configuration_temps
         friendly_name: "Heating Requested Pump Temperature"
         unit_of_measurement: "°C"
-        value_template: "{{ state_attr('sensor.configtemps', 'Bk') }}"
+        value_template: "{{ state_attr('sensor.ecoforest_configuration_temps', 'Bk') }}"
+
+  - platform: rest
+    name: ecoforest_operation
+    resource: "http://192.168.0.254:8998/ecoforest/operationmode"
+    method: "GET"
+    scan_interval: 10
+    force_update: true
+    json_attributes:
+      - CONTROL_CLIMA_INVIERNO
+  - platform: template
+    sensors:
+      ecoforest_operation_mode:
+        entity_id: sensor.ecoforest_operation
+        friendly_name: "Get Operation Mode"
+        value_template: "{{ state_attr('sensor.ecoforest_operation', 'CONTROL_CLIMA_INVIERNO') }}"
 ```
 ## Credits:
 

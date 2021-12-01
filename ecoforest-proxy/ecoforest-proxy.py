@@ -9,7 +9,7 @@ jdata = json.load(open('/data/options.json'))
 
 DEBUG = bool(jdata['debug'])
 DEFAULT_PORT = int(jdata['proxy_port'])
-AQUECIMENTO = bool(jdata['aquecimento'])
+AQUECIMENTO_DHW = bool(jdata['domestic_hot_water'])
 
 host = str(jdata['ecoforest_host'])
 username = str(jdata['ecoforest_user'])
@@ -48,14 +48,6 @@ class EcoforestServer(BaseHTTPRequestHandler):
         else:
             self.send_error(500, 'Something went wrong here on the server side.')
 
-    def current_operation_mode(self):
-        if DEBUG: logging.debug('GET current operation mode')
-        current_operation_mode = self.ecoforest_get_operation_mode()
-        if current_operation_mode:
-            self.send(current_operation_mode)
-        else:
-            self.send_error(500, 'Something went wrong here on the server side.')
-
     def temps(self):
         if DEBUG: logging.debug('GET temps')
         temps = self.ecoforest_temps()
@@ -72,13 +64,13 @@ class EcoforestServer(BaseHTTPRequestHandler):
         else:
             self.send_error(500, 'Something went wrong here on the server side.')
 
-    def set_operation_mode(self, option):
-        if DEBUG: logging.debug('SET OPERATION MODE: %s' % (option))
-        operation_mode = self.ecoforest_set_operation_mode(option)
+    def operation_mode(self):
+        if DEBUG: logging.debug('GET Operation Mode')
+        operation_mode = self.ecoforest_get_operation_mode()
         if operation_mode:
             self.send(operation_mode)
         else:
-            self.send_error(500, 'Something went wrong here on the server side.')
+            self.send_error(500, 'Something went wrong here on the server side getting operation mode.')
 
     def set_status(self, status):
         if DEBUG: logging.debug('SET STATUS: %s' % (status))
@@ -113,6 +105,18 @@ class EcoforestServer(BaseHTTPRequestHandler):
         data = self.ecoforest_call('idOperacion=1019&temperatura=' + temp)
         self.send(self.ecoforest_stats())
 
+    def set_operation_mode(self, mode):
+        if DEBUG: logging.debug('SET Operation Mode: %s' % (mode))
+        if AQUECIMENTO_DHW:
+            # check if mode is valid
+            if int(mode) < 0 or int(mode) > 2:
+                return
+            stats = self.ecoforest_stats()
+            # check if is turned off, otherwise do nothing
+            if stats['state'] == "off":
+                data = self.ecoforest_call('idOperacion=1152&CONTROL_CLIMA_INVIERNO=' + mode)
+                print(data)
+                self.send(self.ecoforest_get_operation_mode())
 
     def set_power(self, power):
         stats = self.ecoforest_call('idOperacion=1002')
@@ -144,43 +148,50 @@ class EcoforestServer(BaseHTTPRequestHandler):
         self.send(self.ecoforest_stats())
 
     def ecoforest_temps(self):
-        if AQUECIMENTO:
+        if AQUECIMENTO_DHW:
+            if DEBUG: logging.debug('Get Operation Temps')
             temps = self.ecoforest_call('idOperacion=1129')
-            return temps
+            reply = dict(e.split('=') for e in temps.text.split('\n')[:-1]) # discard last line ?
+            return reply
         return
 
     def ecoforest_config_temps(self):
-        if AQUECIMENTO:
+        if AQUECIMENTO_DHW:
+            if DEBUG: logging.debug('Get Configuration Temps')
             config_temps = self.ecoforest_call('idOperacion=1130')
-            return config_temps
+            reply = dict(e.split('=') for e in config_temps.text.split('\n')[:-1]) # discard last line ?
+            return reply
         return
 
     def ecoforest_get_operation_mode(self):
-        current_operation_mode = self.ecoforest_call('idOperacion=1153')
-        reply = dict(e.split('=') for e in current_operation_mode.text.split('\n')[:-1]) # discard last line ?
-        states = {
-            '0'  : 'aqs + heating',
-            '1'  : 'aqs',
-            '2'  : 'heating'
-        }
-        state = reply['CONTROL_CLIMA_INVIERNO']
-        if state in states: 
-            reply['state'] = states[state]
-        else:
-            reply['state'] = 'unknown'
-            logging.debug('reply: %s', reply)
+        if AQUECIMENTO_DHW:
+            if DEBUG: logging.debug('Get Operation Mode')
+            current_operation_mode = self.ecoforest_call('idOperacion=1153')
+            reply = dict(e.split('=') for e in current_operation_mode.text.split('\n')[:-1]) # discard last line ?
+            states = {
+                '0'  : 'aqs + heating',
+                '1'  : 'aqs',
+                '2'  : 'heating'
+            }
+            state = reply['CONTROL_CLIMA_INVIERNO']
+            if state in states: 
+                reply['state'] = states[state]
+            else:
+                reply['state'] = 'unknown'
+                logging.debug('reply: %s', reply)
 
-        return reply
-
+            return reply
+        return
 
     def ecoforest_set_operation_mode(self, option):
         # 0 - AQS + Heating
         # 1 - AQS
         # 2 - Heating 
-        if AQUECIMENTO:
+        if AQUECIMENTO_DHW:
             operation_mode = self.ecoforest_call('idOperacion=1152&CONTROL_CLIMA_INVIERNO=' + str(option))
-            return operation_mode
-        return
+            print(operation_mode)
+            self.send(self.ecoforest_get_operation_mode())
+            
 
     def ecoforest_stats(self):
         stats = self.ecoforest_call('idOperacion=1002')
@@ -265,10 +276,11 @@ class EcoforestServer(BaseHTTPRequestHandler):
             '/ecoforest/fullstats': self.stats,
             '/ecoforest/operationtemps': self.temps,
             '/ecoforest/configtemps': self.config_temps,
-            '/ecoforest/current_operation_mode': self.current_operation_mode,
+            '/ecoforest/operationmode': self.operation_mode,
             '/ecoforest/status': self.get_status,
             '/ecoforest/set_status': self.set_status,
             '/ecoforest/set_temp': self.set_temp,
+            '/ecoforest/set_operationmode': self.set_operation_mode,
             '/ecoforest/set_power': self.set_power,
         }
 
