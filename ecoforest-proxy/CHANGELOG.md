@@ -8,4 +8,8 @@
 ## 0.5
 
 - Added new requests and new sensors
-- If using a domestic hot water connected with stove, can check several temperatures, and are able to change operation mode of stove, between DHW, Heatinh and both
+- If using a domestic hot water connected with stove, can check several temperatures, and are able to change operation mode of stove, between DHW, Heating and both
+
+## 0.6
+
+- For some reason some attributes have a space before the name, so use new info in readme to get right temperatures
