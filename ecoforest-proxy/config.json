@@ -1,6 +1,6 @@
 {
 	"name": "ecoforest-proxy",
-	"version": "0.63",
+	"version": "0.64",
 	"slug": "ecoforest_proxy",
 	"description": "Ecoforest Proxy",
 	"arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
@@ -10,7 +10,7 @@
 		"debug": "0",
 		"domestic_hot_water": "0",
 		"proxy_port": "8998",
-		"ecoforest_host": "http://192.168.1.70",
+		"ecoforest_host": "http://192.168.10.132",
 		"ecoforest_user": "",
 		"ecoforest_pass": ""
 	},

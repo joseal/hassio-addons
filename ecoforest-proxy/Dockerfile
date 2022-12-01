@@ -7,4 +7,8 @@ RUN pip install --no-cache-dir requests
 
 HEALTHCHECK --interval=5m --timeout=5s CMD curl --fail http://localhost:8998/healthcheck || exit 1
 
-CMD [ "python", "/ecoforest-proxy.py" ]
+ENTRYPOINT [ "" ]
+
+CMD [ "python3", "/ecoforest-proxy.py" ]
+
+
