@@ -1,6 +1,6 @@
 {
 	"name": "ecoforest-proxy",
-	"version": "0.64",
+	"version": "0.65",
 	"slug": "ecoforest_proxy",
 	"description": "Ecoforest Proxy",
 	"arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
